@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8">
+<script src="phaser.min.js"></script>
+<script language="javascript">
+
+var game = new Phaser.Game(800, 600, Phaser.AUTO, 'J\'apprends les nombres', { preload: preload, create: create, update:update });
+
+function preload() {
+
+	game.load.spritesheet('chiffres_bg', 'chiffres_bg.png', 160,227,2);
+
+}
+
+var dizaine = {};
+var unité = {};
+
+var time = 270;
+var graphics;
+
+var score = 0;
+
+function create() {
+
+	game.stage.backgroundColor = "#dedede";
+
+	var style = { font: "192px Arial", fill: "#000000", align: "center" };
+
+	dizaine.pos = {x:150, y:150}
+	dizaine.bg = game.add.sprite(dizaine.pos.x,dizaine.pos.y,'chiffres_bg', 0);
+	dizaine.bg.anchor.setTo(.5,.5);
+	dizaine.num = game.add.text(dizaine.pos.x, dizaine.pos.y, "-", style);
+	dizaine.num.anchor.setTo(.5,.5);
+
+	unité.pos = {x:150+160, y:150}
+	unité.bg = game.add.sprite(unité.pos.x,unité.pos.y,'chiffres_bg', 1);
+	unité.bg.anchor.setTo(.5,.5);
+	unité.num = game.add.text(unité.pos.x, unité.pos.y, "-", style);
+	unité.num.anchor.setTo(.5,.5);
+
+	validation = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+	validation.onDown.add(valider, this);
+
+	graphics = game.add.graphics(600, 150);
+	graphics.lineStyle(32, 0xff0080);
+	graphics.arc(0, 0, 90, game.math.degToRad(-90), game.math.degToRad(180), false);
+
+
+
+}
+
+function valider() {
+	dizaine.num.setText(game.rnd.integerInRange(1, 9));
+	unité.num.setText(game.rnd.integerInRange(0, 9));
+	time = 270;
+	score += time;
+	console.log(score);
+}
+
+function update() {
+		time = time - 0.5 ;
+		graphics.destroy();
+		graphics = game.add.graphics(600, 150);
+		graphics.lineStyle(16, 0xff0080);
+		graphics.arc(0, 0, 90, game.math.degToRad(-90), game.math.degToRad(time), false);
+}
+
+</script>
+</html>
