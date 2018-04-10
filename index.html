@@ -18,17 +18,23 @@ function preload() {
 	game.state.add('succes', succes);
 
 	//TODO récupération des paramètres depuis localStorage...
+	if (localStorage.getItem('speed')!=undefined) {
+		parameters.speed.current = parseInt(localStorage.getItem('speed'));
+	}
+	if (localStorage.getItem('duration')!=undefined) {
+		parameters.duration.current = parseInt(localStorage.getItem('duration'));
+	}
 }
 
 var parameters = {
 	speed: {
-		current: 5,
+		current: 10,
 		min: 1,
-		max: 30,
+		max: 20,
 		gui: {text: null, less: null, more: null}
 	},
 	duration: {
-		current: 20,
+		current: 30,
 		min: 10,
 		max: 50,
 		gui: {text: null, less: null, more: null}
@@ -41,19 +47,19 @@ function create() {
 
 	var style = { font: "36px Arial", fill: "#000000", align: "center" };
 
-	parameters['speed'].gui.less = game.add.button(415,60, 'bouton', adjustParameter, parameters['speed'], 1, 0, 2);
+	parameters['speed'].gui.less = game.add.button(415,60, 'bouton', adjustParameter, 'speed', 1, 0, 2);
 	parameters['speed'].gui.less.increment = -1;
 	parameters['speed'].gui.less.anchor.setTo(.5,.5);
-	parameters['speed'].gui.more = game.add.button(495,60, 'bouton', adjustParameter, parameters['speed'], 5, 4, 6);
+	parameters['speed'].gui.more = game.add.button(495,60, 'bouton', adjustParameter, 'speed', 5, 4, 6);
 	parameters['speed'].gui.more.increment = 1;
 	parameters['speed'].gui.more.anchor.setTo(.5,.5);
 	parameters['speed'].gui.text = game.add.text(455,60, parameters['speed'].current, style);
 	parameters['speed'].gui.text.anchor.setTo(.5,.5);
 
-	parameters['duration'].gui.less = game.add.button(415,125, 'bouton', adjustParameter, parameters['duration'], 1, 0, 2);
+	parameters['duration'].gui.less = game.add.button(415,125, 'bouton', adjustParameter, 'duration', 1, 0, 2);
 	parameters['duration'].gui.less.increment = -1;
 	parameters['duration'].gui.less.anchor.setTo(.5,.5);
-	parameters['duration'].gui.more = game.add.button(495,125, 'bouton', adjustParameter, parameters['duration'], 5, 4, 6);
+	parameters['duration'].gui.more = game.add.button(495,125, 'bouton', adjustParameter, 'duration', 5, 4, 6);
 	parameters['duration'].gui.more.increment = 1;
 	parameters['duration'].gui.more.anchor.setTo(.5,.5);
 	parameters['duration'].gui.text = game.add.text(455,125, parameters['duration'].current, style);
@@ -65,13 +71,13 @@ function create() {
 
 function adjustParameter(e) {
 	var incr = e.increment;
-	var param = this.current;
 	if (incr>0) {
-		this.current=Math.min(this.current+incr, this.max);
+		parameters[this].current=Math.min(parameters[this].current+incr, parameters[this].max);
 	} else if (e.increment<0) {
-		this.current=Math.max(this.current+incr, this.min);
+		parameters[this].current=Math.max(parameters[this].current+incr, parameters[this].min);
 	}
-	this.gui.text.setText(this.current);
+	parameters[this].gui.text.setText(parameters[this].current);
+	localStorage.setItem(this, parameters[this].current);
 }
 
 function startGame() {
