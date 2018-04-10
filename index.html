@@ -16,6 +16,8 @@ function preload() {
 
 	game.state.add('nombres', nombres);
 	game.state.add('succes', succes);
+
+	//TODO récupération des paramètres depuis localStorage...
 }
 
 var parameters = {
@@ -57,7 +59,7 @@ function create() {
 	parameters['duration'].gui.text = game.add.text(455,125, parameters['duration'].current, style);
 	parameters['duration'].gui.text.anchor.setTo(.5,.5);
 
-	var commencer = game.add.button(580,70, 'commencer', startGame, this, 0, 1, 2);
+	var commencer = game.add.button(580,65, 'commencer', startGame, this, 0, 1, 2);
 
 }
 
