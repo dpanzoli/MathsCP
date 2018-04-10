@@ -11,19 +11,73 @@ var game = new Phaser.Game(800, 600, Phaser.AUTO, 'J\'apprends les nombres', { p
 function preload() {
 
 	game.load.image('bg', 'bg.png');
+	game.load.spritesheet('bouton', 'boutons.png', 32, 32, 8);
+	game.load.spritesheet('commencer', 'commencer.png', 180, 60, 3);
+
+	game.state.add('nombres', nombres);
+	game.state.add('succes', succes);
 }
+
+
+var speed = {current: 5, min: 1, max: 30};
+var speedText;
+var duration = {current: 20, min:10, max:50};
+var durationText;
 
 function create() {
-	
+
 	game.add.sprite(0, 0, 'bg');
-	
+
+	var style = { font: "36px Arial", fill: "#000000", align: "center" };
+
+	var speedLess = game.add.button(415,60, 'bouton', adjustSpeed, this, 1, 0, 2);
+	speedLess.increment = -1;
+	speedLess.anchor.setTo(.5,.5);
+	var speedMore = game.add.button(495,60, 'bouton', adjustSpeed, this, 5, 4, 6);
+	speedMore.increment = 1;
+	speedMore.anchor.setTo(.5,.5);
+	speedText = game.add.text(455,60, speed.current, style);
+	speedText.anchor.setTo(.5,.5);
+
+	var durationLess = game.add.button(415,125, 'bouton', adjustDuration, this, 1, 0, 2);
+	durationLess.increment = -1;
+	durationLess.anchor.setTo(.5,.5);
+	var durationMore = game.add.button(495,125, 'bouton', adjustDuration, this, 5, 4, 6);
+	durationMore.increment = 1;
+	durationMore.anchor.setTo(.5,.5);
+	durationText = game.add.text(455,125, duration.current, style);
+	durationText.anchor.setTo(.5,.5);
+
+	var commencer = game.add.button(580,70, 'commencer', startGame, this, 0, 1, 2);
+
+}
+
+function adjustSpeed(e) {
+	if (e.increment>0) {
+		speed.current=Math.min(speed.current+e.increment, speed.max);
+	} else if (e.increment<0) {
+		speed.current=Math.max(speed.current+e.increment, speed.min);
+	}
+	speedText.setText(speed.current);
+}
+
+function adjustDuration(e) {
+	if (e.increment>0) {
+		duration.current=Math.min(duration.current+e.increment, duration.max);
+	} else if (e.increment<0) {
+		duration.current=Math.max(duration.current+e.increment, duration.min);
+	}
+	durationText.setText(duration.current);
+}
+
+function startGame() {
+	nombres.maxTime = speed.current;
+	nombres.objective = duration.current * (speed.current/2);
+	game.state.start('nombres');
 }
 
 
-game.state.add('nombres', nombres);
-game.state.add('succes', succes);
 
-game.state.start('nombres');
 
 </script>
 </html>
