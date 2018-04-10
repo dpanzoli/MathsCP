@@ -4,7 +4,7 @@ var  nombres = {
 	unité: {pos: {x:150+160, y:150}},
 
 	maxTime: 10, //secondes
-	objective: 25*5, //secondes épargnées cumulées
+	objective: 5*5, //secondes épargnées cumulées
 
 	graphicsTimer: null,
 	timer: null,
@@ -66,7 +66,7 @@ var  nombres = {
 	
 	validate: function() {
 		this.score += this.timeLeft;
-		this.updateProgress();
+		if (this.score !=0) this.updateProgress();
 		this.reset();
 	},
 	
@@ -78,7 +78,7 @@ var  nombres = {
 
 	updateProgress: function() {
 		if (this.score>this.objective) {
-			this.score = this.objective;
+			this.game.state.start('succes');
 		} 
 		if (this.graphicsProgress) this.graphicsProgress.destroy();
 		this.graphicsProgress = game.add.graphics(50, 550);

@@ -2,7 +2,8 @@
 <html>
 <meta charset="UTF-8">
 <script src="phaser.min.js"></script>
-<script src="Nombres.js"></script>
+<script src="nombres.js"></script>
+<script src="succes.js"></script>
 <script language="javascript">
 
 var game = new Phaser.Game(800, 600, Phaser.AUTO, 'J\'apprends les nombres', { preload: preload, create: create});
@@ -20,6 +21,7 @@ function create() {
 
 
 game.state.add('nombres', nombres);
+game.state.add('succes', succes);
 
 game.state.start('nombres');
 
