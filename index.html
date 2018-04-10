@@ -18,11 +18,20 @@ function preload() {
 	game.state.add('succes', succes);
 }
 
-
-var speed = {current: 5, min: 1, max: 30};
-var speedText;
-var duration = {current: 20, min:10, max:50};
-var durationText;
+var parameters = {
+	speed: {
+		current: 5,
+		min: 1,
+		max: 30,
+		gui: {text: null, less: null, more: null}
+	},
+	duration: {
+		current: 20,
+		min: 10,
+		max: 50,
+		gui: {text: null, less: null, more: null}
+	}
+};
 
 function create() {
 
@@ -30,49 +39,42 @@ function create() {
 
 	var style = { font: "36px Arial", fill: "#000000", align: "center" };
 
-	var speedLess = game.add.button(415,60, 'bouton', adjustSpeed, this, 1, 0, 2);
-	speedLess.increment = -1;
-	speedLess.anchor.setTo(.5,.5);
-	var speedMore = game.add.button(495,60, 'bouton', adjustSpeed, this, 5, 4, 6);
-	speedMore.increment = 1;
-	speedMore.anchor.setTo(.5,.5);
-	speedText = game.add.text(455,60, speed.current, style);
-	speedText.anchor.setTo(.5,.5);
+	parameters['speed'].gui.less = game.add.button(415,60, 'bouton', adjustParameter, parameters['speed'], 1, 0, 2);
+	parameters['speed'].gui.less.increment = -1;
+	parameters['speed'].gui.less.anchor.setTo(.5,.5);
+	parameters['speed'].gui.more = game.add.button(495,60, 'bouton', adjustParameter, parameters['speed'], 5, 4, 6);
+	parameters['speed'].gui.more.increment = 1;
+	parameters['speed'].gui.more.anchor.setTo(.5,.5);
+	parameters['speed'].gui.text = game.add.text(455,60, parameters['speed'].current, style);
+	parameters['speed'].gui.text.anchor.setTo(.5,.5);
 
-	var durationLess = game.add.button(415,125, 'bouton', adjustDuration, this, 1, 0, 2);
-	durationLess.increment = -1;
-	durationLess.anchor.setTo(.5,.5);
-	var durationMore = game.add.button(495,125, 'bouton', adjustDuration, this, 5, 4, 6);
-	durationMore.increment = 1;
-	durationMore.anchor.setTo(.5,.5);
-	durationText = game.add.text(455,125, duration.current, style);
-	durationText.anchor.setTo(.5,.5);
+	parameters['duration'].gui.less = game.add.button(415,125, 'bouton', adjustParameter, parameters['duration'], 1, 0, 2);
+	parameters['duration'].gui.less.increment = -1;
+	parameters['duration'].gui.less.anchor.setTo(.5,.5);
+	parameters['duration'].gui.more = game.add.button(495,125, 'bouton', adjustParameter, parameters['duration'], 5, 4, 6);
+	parameters['duration'].gui.more.increment = 1;
+	parameters['duration'].gui.more.anchor.setTo(.5,.5);
+	parameters['duration'].gui.text = game.add.text(455,125, parameters['duration'].current, style);
+	parameters['duration'].gui.text.anchor.setTo(.5,.5);
 
 	var commencer = game.add.button(580,70, 'commencer', startGame, this, 0, 1, 2);
 
 }
 
-function adjustSpeed(e) {
-	if (e.increment>0) {
-		speed.current=Math.min(speed.current+e.increment, speed.max);
+function adjustParameter(e) {
+	var incr = e.increment;
+	var param = this.current;
+	if (incr>0) {
+		this.current=Math.min(this.current+incr, this.max);
 	} else if (e.increment<0) {
-		speed.current=Math.max(speed.current+e.increment, speed.min);
+		this.current=Math.max(this.current+incr, this.min);
 	}
-	speedText.setText(speed.current);
-}
-
-function adjustDuration(e) {
-	if (e.increment>0) {
-		duration.current=Math.min(duration.current+e.increment, duration.max);
-	} else if (e.increment<0) {
-		duration.current=Math.max(duration.current+e.increment, duration.min);
-	}
-	durationText.setText(duration.current);
+	this.gui.text.setText(this.current);
 }
 
 function startGame() {
-	nombres.maxTime = speed.current;
-	nombres.objective = duration.current * (speed.current/2);
+	nombres.maxTime = parameters.speed.current;
+	nombres.objective = parameters.duration.current * (parameters.speed.current/2);
 	game.state.start('nombres');
 }
 
