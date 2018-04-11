@@ -14,11 +14,12 @@ var  nombres = {
 	timeLeft: 0,
 	
     preload: function() {
-       game.load.spritesheet('chiffres_bg', 'chiffres_bg.png', 160,227,2); 
+		game.load.spritesheet('chiffres_bg', 'chiffres_bg.png', 160,227,2); 
 
 		game.load.image('head', 'photo_Joshua.png');
 		game.load.spritesheet('body', 'walk_anim.png', 50, 86, 9);
 	   
+		game.load.audio('correct', 'correct.mp3');
     },
  
 	joshua: null,
@@ -26,10 +27,14 @@ var  nombres = {
 	walk: null,
  
 	nombre: 0,
+	correctSound: null,
+	running: false;
  
     create: function() {
 		game.stage.backgroundColor = "#dedede";
 
+		correctSound = game.add.audio('correct');
+		
 		this.body = game.add.sprite(+30, -80, 'body',1);
 		var head = game.add.sprite(11, -13, 'head',1);
 		this.body.addChild(head)
@@ -103,6 +108,7 @@ var  nombres = {
 	
 	validate: function(n) {
 		if (n==this.nombre) {
+			correctSound.play();
 			this.score += this.timeLeft;
 			if (this.score !=0) this.updateProgress();
 			if (this.score<this.objective) {
