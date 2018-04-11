@@ -86,10 +86,21 @@ var  nombres = {
 	validate: function() {
 		this.score += this.timeLeft;
 		if (this.score !=0) this.updateProgress();
-		this.reset();
+		if (this.score<this.objective) {
+			this.reset();
+		}
 	},
 	
 	reset: function() {
+		//Log du résultat précédent
+		var requestAdd = db.transaction(["traces"], "readwrite")
+			.objectStore("traces")
+			.add({
+				timestamp: new Date(),
+				nombre:this.dizaine.num.text+this.unité.num.text,
+				time: this.maxTime-this.timeLeft
+			});
+									 
 		this.dizaine.num.setText(game.rnd.integerInRange(1, 9));
 		this.unité.num.setText(game.rnd.integerInRange(0, 9));
 		this.timeLeft = this.maxTime;

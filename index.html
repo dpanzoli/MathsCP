@@ -1,13 +1,54 @@
 <!DOCTYPE html>
 <html>
 <meta charset="UTF-8">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/1.11.8/semantic.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/1.11.8/semantic.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <script src="phaser.min.js"></script>
 <script src="menu.js"></script>
 <script src="nombres.js"></script>
 <script src="succes.js"></script>
+<style>
+	.ui.container {
+		padding:10px;
+	}
+	#phaserGame {
+		width: 800px;
+		height: 600px;
+		margin: auto;
+	}
+	#showAnalytics {
+		position: absolute;
+	}
+</style>
+<body class="ui container">
+<button id="showAnalytics" class="ui button">
+	Stats
+</button>
+<div id="phaserGame"></div>
+<div class="ui modal">
+  <i class="close icon"></i>
+  <div class="header">Analytics</div>
+  <div class="content" id="analytics">
+	<div id="graphe1"></div>  
+  </div>
+  <div class="actions">
+    <div class="ui black deny button">
+      Fermer
+    </div>
+  </div>
+</div>
+
+<div id="analytics">
+<!--table>
+	<tr><th>timestamp</th><tr>
+</table-->
+</div>
+
 <script language="javascript">
 
-var game = new Phaser.Game(800, 600, Phaser.AUTO, 'J\'apprends les nombres');
+var game = new Phaser.Game(800, 600, Phaser.AUTO, 'phaserGame');
 
 game.state.add('menu', menu);
 game.state.add('nombres', nombres);
@@ -16,4 +57,69 @@ game.state.add('succes', succes);
 game.state.start('menu');
 
 </script>
+<script>
+
+	$(showAnalytics).click(function() {
+		$('.ui.modal').modal('show');
+	});
+
+</script>
+<script>
+var version = 3;
+
+var request = indexedDB.open('tracesDB', version);
+var db;
+
+request.onupgradeneeded = function(e) {
+  console.log("La version a changé. (Re)Création de la base");
+  db = e.target.result;
+  db.deleteObjectStore('traces');
+  store = db.createObjectStore('traces', {keyPath: 'timestamp'});
+};
+
+request.onsuccess = function(e) {
+  console.log("Ouverture de la base");
+  db = e.target.result;
+  var transaction = db.transaction('traces', "readwrite");
+  var store = transaction.objectStore('traces');
+  
+  var points = {
+			x:[],
+			y:[],
+			mode: 'markers'
+		}
+	
+	store.openCursor().onsuccess = function(event) {
+
+		var cursor = event.target.result;
+		//var timestamp = new Date(cursor.key);
+		if (cursor) {
+			points.x.push(cursor.value.nombre);
+			points.y.push(cursor.value.time);
+			cursor.continue();
+		} else {
+		
+			var data = [ points ];
+
+			var layout = {
+			  xaxis: {
+				range: [ 0, 100 ],
+				title: 'nombre à trouver [10,99]'
+				
+			  },
+			  yaxis: {
+				range: [0, 10],
+				title: 'nombre trouvé en ... secondes'
+			  },
+			  title:'Temps passé par nombre'
+			};
+			
+			Plotly.newPlot('graphe1', data, layout);
+		}
+	};
+
+};
+
+</script>
+</body>
 </html>
