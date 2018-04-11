@@ -73,7 +73,9 @@ var db;
 request.onupgradeneeded = function(e) {
   console.log("La version a changé. (Re)Création de la base");
   db = e.target.result;
-  db.deleteObjectStore('traces');
+  try {
+	db.deleteObjectStore('traces');
+  } catch (error) {}
   store = db.createObjectStore('traces', {keyPath: 'timestamp'});
 };
 

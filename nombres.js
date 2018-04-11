@@ -25,6 +25,8 @@ var  nombres = {
 	body: null,
 	walk: null,
  
+	nombre: 0,
+ 
     create: function() {
 		game.stage.backgroundColor = "#dedede";
 
@@ -64,6 +66,22 @@ var  nombres = {
 		this.score = 0;
 		this.timeLeft = 0,
 		this.validate();
+		
+		//reconnaissance vocale
+		var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition
+
+		recognition = new SpeechRecognition();
+		recognition.context = this;
+		recognition.continuous = true;
+		recognition.lang = "fr-FR";
+		recognition.onresult = function (event) {
+			for (i = event.resultIndex; i < event.results.length; i++) {
+				nombre = event.results[i][0].transcript;
+				console.log(event.results[i][0].confidence);
+				this.context.validate(nombre);
+			}
+		}
+		recognition.start()
     },
  
     update: function() {
@@ -83,11 +101,13 @@ var  nombres = {
 		}
     },
 	
-	validate: function() {
-		this.score += this.timeLeft;
-		if (this.score !=0) this.updateProgress();
-		if (this.score<this.objective) {
-			this.reset();
+	validate: function(n) {
+		if (n==this.nombre) {
+			this.score += this.timeLeft;
+			if (this.score !=0) this.updateProgress();
+			if (this.score<this.objective) {
+				this.reset();
+			}
 		}
 	},
 	
@@ -100,9 +120,10 @@ var  nombres = {
 				nombre:this.dizaine.num.text+this.unité.num.text,
 				time: this.maxTime-this.timeLeft
 			});
-									 
-		this.dizaine.num.setText(game.rnd.integerInRange(1, 9));
-		this.unité.num.setText(game.rnd.integerInRange(0, 9));
+
+		this.nombre = game.rnd.integerInRange(10, 99);
+		this.dizaine.num.setText(parseInt(this.nombre/10));
+		this.unité.num.setText(this.nombre%10);
 		this.timeLeft = this.maxTime;
 	},
 
