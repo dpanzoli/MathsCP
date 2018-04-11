@@ -85,7 +85,7 @@ var  nombres = {
 	
 	validate: function() {
 		this.score += this.timeLeft;
-		if (this.score !=0) this.updateProgress(this.timeLeft);
+		if (this.score !=0) this.updateProgress();
 		this.reset();
 	},
 	
@@ -95,7 +95,7 @@ var  nombres = {
 		this.timeLeft = this.maxTime;
 	},
 
-	updateProgress: function(s) {
+	updateProgress: function() {
 		if (this.score>this.objective) {
 			this.score = this.objective;
 		}
@@ -106,8 +106,8 @@ var  nombres = {
 		this.graphicsProgress.drawRoundedRect(3,3,xProgress,24,5);
 		this.graphicsProgress.endFill();
 		//avance Joshua
-		tween = game.add.tween(this.joshua).to( { x: xProgress }, s*100, Phaser.Easing.Linear.None);
-		this.body.animations.play('walk', 50, true);
+		tween = game.add.tween(this.joshua).to( { x: xProgress }, (this.timeLeft/this.maxTime)*1000, Phaser.Easing.Linear.None);
+		this.body.animations.play('walk', 30, true);
 		tween.onComplete.add(function() {
 			this.body.animations.stop(null, true);
 			if (this.score==this.objective) {
