@@ -28,6 +28,7 @@ var  nombres = {
  
 	nombre: 0,
 	correctSound: null,
+	counting: true,
  
     create: function() {
 		game.stage.backgroundColor = "#dedede";
@@ -84,24 +85,32 @@ var  nombres = {
 				console.log(event.results[i][0].confidence);
 				this.context.validate(nombre);
 			}
+			recognition.context.counting = true;
+		}
+		recognition.onsoundstart = function(event) {
+			//TODO: bug. Ne fonctionne qu'unne fois
+			console.log("tu as dit quoi ?");
+			recognition.context.counting = false;
 		}
 		recognition.start()
     },
  
     update: function() {
-		this.timeLeft = this.timeLeft - (game.time.elapsed / 1000) ;
-		this.timer.setText(parseInt(this.timeLeft)+1);
-		if (this.timeLeft <= 0) {
-			this.reset();
-		} else {
-			if (this.graphicsTimer) this.graphicsTimer.destroy();
-			this.graphicsTimer = game.add.graphics(600, 150);
-			this.graphicsTimer.lineStyle(16, 0xff0080);
-			this.graphicsTimer.arc(
-				0, 0, 90, 
-				game.math.degToRad(-90), 
-				game.math.degToRad(this.timeLeft/this.maxTime*360-90),
-				false);
+		if (this.counting) {
+			this.timeLeft = this.timeLeft - (game.time.elapsed / 1000) ;
+			this.timer.setText(parseInt(this.timeLeft)+1);
+			if (this.timeLeft <= 0) {
+				this.reset();
+			} else {
+				if (this.graphicsTimer) this.graphicsTimer.destroy();
+				this.graphicsTimer = game.add.graphics(600, 150);
+				this.graphicsTimer.lineStyle(16, 0xff0080);
+				this.graphicsTimer.arc(
+					0, 0, 90, 
+					game.math.degToRad(-90), 
+					game.math.degToRad(this.timeLeft/this.maxTime*360-90),
+					false);
+			}
 		}
     },
 	
