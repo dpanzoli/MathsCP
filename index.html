@@ -2,92 +2,18 @@
 <html>
 <meta charset="UTF-8">
 <script src="phaser.min.js"></script>
+<script src="menu.js"></script>
 <script src="nombres.js"></script>
 <script src="succes.js"></script>
 <script language="javascript">
 
-var game = new Phaser.Game(800, 600, Phaser.AUTO, 'J\'apprends les nombres', { preload: preload, create: create});
+var game = new Phaser.Game(800, 600, Phaser.AUTO, 'J\'apprends les nombres');
 
-function preload() {
+game.state.add('menu', menu);
+game.state.add('nombres', nombres);
+game.state.add('succes', succes);
 
-	game.load.image('bg', 'bg.png');
-	game.load.spritesheet('bouton', 'boutons.png', 32, 32, 8);
-	game.load.spritesheet('commencer', 'commencer.png', 180, 60, 3);
-
-	game.state.add('nombres', nombres);
-	game.state.add('succes', succes);
-
-	//TODO récupération des paramètres depuis localStorage...
-	if (localStorage.getItem('speed')!=undefined) {
-		parameters.speed.current = parseInt(localStorage.getItem('speed'));
-	}
-	if (localStorage.getItem('duration')!=undefined) {
-		parameters.duration.current = parseInt(localStorage.getItem('duration'));
-	}
-}
-
-var parameters = {
-	speed: {
-		current: 10,
-		min: 1,
-		max: 20,
-		gui: {text: null, less: null, more: null}
-	},
-	duration: {
-		current: 30,
-		min: 10,
-		max: 50,
-		gui: {text: null, less: null, more: null}
-	}
-};
-
-function create() {
-
-	game.add.sprite(0, 0, 'bg');
-
-	var style = { font: "36px Arial", fill: "#000000", align: "center" };
-
-	parameters['speed'].gui.less = game.add.button(415,60, 'bouton', adjustParameter, 'speed', 1, 0, 2);
-	parameters['speed'].gui.less.increment = -1;
-	parameters['speed'].gui.less.anchor.setTo(.5,.5);
-	parameters['speed'].gui.more = game.add.button(495,60, 'bouton', adjustParameter, 'speed', 5, 4, 6);
-	parameters['speed'].gui.more.increment = 1;
-	parameters['speed'].gui.more.anchor.setTo(.5,.5);
-	parameters['speed'].gui.text = game.add.text(455,60, parameters['speed'].current, style);
-	parameters['speed'].gui.text.anchor.setTo(.5,.5);
-
-	parameters['duration'].gui.less = game.add.button(415,125, 'bouton', adjustParameter, 'duration', 1, 0, 2);
-	parameters['duration'].gui.less.increment = -1;
-	parameters['duration'].gui.less.anchor.setTo(.5,.5);
-	parameters['duration'].gui.more = game.add.button(495,125, 'bouton', adjustParameter, 'duration', 5, 4, 6);
-	parameters['duration'].gui.more.increment = 1;
-	parameters['duration'].gui.more.anchor.setTo(.5,.5);
-	parameters['duration'].gui.text = game.add.text(455,125, parameters['duration'].current, style);
-	parameters['duration'].gui.text.anchor.setTo(.5,.5);
-
-	var commencer = game.add.button(580,65, 'commencer', startGame, this, 0, 1, 2);
-
-}
-
-function adjustParameter(e) {
-	var incr = e.increment;
-	if (incr>0) {
-		parameters[this].current=Math.min(parameters[this].current+incr, parameters[this].max);
-	} else if (e.increment<0) {
-		parameters[this].current=Math.max(parameters[this].current+incr, parameters[this].min);
-	}
-	parameters[this].gui.text.setText(parameters[this].current);
-	localStorage.setItem(this, parameters[this].current);
-}
-
-function startGame() {
-	nombres.maxTime = parameters.speed.current;
-	nombres.objective = parameters.duration.current * (parameters.speed.current/2);
-	game.state.start('nombres');
-}
-
-
-
+game.state.start('menu');
 
 </script>
 </html>

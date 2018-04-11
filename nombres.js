@@ -14,12 +14,29 @@ var  nombres = {
 	timeLeft: 0,
 	
     preload: function() {
-       game.load.spritesheet('chiffres_bg', 'chiffres_bg.png', 160,227,2);  
+       game.load.spritesheet('chiffres_bg', 'chiffres_bg.png', 160,227,2); 
+
+		game.load.image('head', 'photo_Joshua.png');
+		game.load.spritesheet('body', 'walk_anim.png', 50, 86, 9);
+	   
     },
+ 
+	joshua: null,
+	body: null,
+	walk: null,
  
     create: function() {
 		game.stage.backgroundColor = "#dedede";
 
+		this.body = game.add.sprite(+30, -80, 'body',1);
+		var head = game.add.sprite(11, -13, 'head',1);
+		this.body.addChild(head)
+		this.joshua = game.add.sprite(0,550);
+		this.joshua.addChild(this.body);
+		this.walk = this.body.animations.add('walk');
+		//body.animations.play('walk', 10, true);
+
+		
 		var style = { font: "192px Arial", fill: "#000000", align: "center" };
 
 		this.dizaine.bg = game.add.sprite(this.dizaine.pos.x,this.dizaine.pos.y,'chiffres_bg', 0);
@@ -44,6 +61,8 @@ var  nombres = {
 		g.drawRoundedRect(0,0,700,30,10);
 		g.endFill();
 		
+		this.score = 0;
+		this.timeLeft = 0,
 		this.validate();
     },
  
@@ -66,7 +85,7 @@ var  nombres = {
 	
 	validate: function() {
 		this.score += this.timeLeft;
-		if (this.score !=0) this.updateProgress();
+		if (this.score !=0) this.updateProgress(this.timeLeft);
 		this.reset();
 	},
 	
@@ -76,14 +95,26 @@ var  nombres = {
 		this.timeLeft = this.maxTime;
 	},
 
-	updateProgress: function() {
+	updateProgress: function(s) {
 		if (this.score>this.objective) {
-			this.game.state.start('succes');
-		} 
+			this.score = this.objective;
+		}
+		var xProgress = 694*(this.score/this.objective);
 		if (this.graphicsProgress) this.graphicsProgress.destroy();
 		this.graphicsProgress = game.add.graphics(50, 550);
 		this.graphicsProgress.beginFill(0x87FF61,1);
-		this.graphicsProgress.drawRoundedRect(3,3,694*(this.score/this.objective),24,5);
+		this.graphicsProgress.drawRoundedRect(3,3,xProgress,24,5);
 		this.graphicsProgress.endFill();
+		//avance Joshua
+		tween = game.add.tween(this.joshua).to( { x: xProgress }, s*100, Phaser.Easing.Linear.None);
+		this.body.animations.play('walk', 50, true);
+		tween.onComplete.add(function() {
+			this.body.animations.stop(null, true);
+			if (this.score==this.objective) {
+				this.game.state.start('succes');
+			} 
+		}, this);
+		tween.start();
+
 	}
 }
