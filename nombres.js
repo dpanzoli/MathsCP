@@ -28,7 +28,6 @@ var  nombres = {
  
 	nombre: 0,
 	correctSound: null,
-	running: false;
  
     create: function() {
 		game.stage.backgroundColor = "#dedede";
