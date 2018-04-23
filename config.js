@@ -1,1 +1,7 @@
-game_user_login = 'David'
+var params = {
+	user: {
+/*		login: 'Joshua',
+		photo: 'joshua150.png'
+*/		login: 'David'
+	}
+}

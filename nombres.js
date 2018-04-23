@@ -4,7 +4,7 @@ var  nombres = {
 	unité: {pos: {x:150+160, y:150}},
 
 	maxTime: 10, //secondes
-	objective: 5*5, //secondes épargnées cumulées
+	objective: 10, //secondes épargnées cumulées
 
 	graphicsTimer: null,
 	timer: null,
@@ -20,6 +20,9 @@ var  nombres = {
 		game.load.spritesheet('body', 'walk_anim.png', 50, 86, 9);
 	   
 		game.load.audio('correct', 'correct.mp3');
+
+		this.maxTime = parameters.nombres.vitesse.start;
+		this.objective = parameters.nombres.duree.start;
     },
  
 	joshua: null,
@@ -110,7 +113,7 @@ var  nombres = {
 				url: 'http://davidpanzo.hd.free.fr:8080/add',
 				datatype: 'json',
 				data: {
-					login: game_user_login,
+					login: $('#login').text(),
 					nombre:nbr,
 					temps: this.maxTime-this.timeLeft
 				},

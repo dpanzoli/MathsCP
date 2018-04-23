@@ -2,32 +2,89 @@
 <html>
 <meta charset="UTF-8">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/1.11.8/semantic.min.css"/>
+<link rel="stylesheet" href="range.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/1.11.8/semantic.min.js"></script>
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-<script src="config.js"></script>
+<script src="range.js"></script>
 <script src="phaser.min.js"></script>
-<script src="menu.js"></script>
-<script src="nombres.js"></script>
-<script src="succes.js"></script>
 <style>
-	.ui.container {
+	body {
+		width: 1200px;
+		margin: auto;
 		padding:10px;
 	}
 	#phaserGame {
+		float: right;
 		width: 800px;
 		height: 600px;
 		margin: auto;
 	}
+	#parametres {
+		float: left;
+	}
+	#parametres .accordion {
+		width: 300px !important;
+	}
+	
 	#showAnalytics {
 		position: absolute;
 	}
 </style>
 <body class="ui container">
-<button id="showAnalytics" class="ui button">
-	Stats
-</button>
+
+<div id="parametres">
+	
+	<h2 class="ui header">
+	<img id="photo" src="anonyme.png" class="ui circular image">
+		<span id="login">Anonyme</span>
+	</h2>
+	
+	
+	<div class="ui styled accordion">
+	  <div class="active title">
+		<i class="dropdown icon"></i>
+		Reconnaître les nombres
+	  </div>
+	  <div class="active content">
+		<div class="ui segment">
+			<span>Vitesse</span>
+			<div class="ui range" data-game='nombres' data-param="vitesse"></div>
+		</div>
+
+		<div class="ui segment">
+			<span>Durée</span>
+			<div class="ui range" data-game='nombres' data-param='duree'></div>
+		</div>
+
+		<button id="startGame" class="ui button">
+			Démarrer
+		</button>
+
+		<button id="showAnalytics" class="ui button">
+			Stats
+		</button>
+	  </div>
+	  <div class="title">
+		<i class="dropdown icon"></i>
+		Additionner deux chiffres
+	  </div>
+	  <div class="content">
+		<p>À venir ...</p>
+	  </div>
+	  <div class="title">
+		<i class="dropdown icon"></i>
+		Les additions posées
+	  </div>
+	  <div class="content">
+		<p>À venir ...</p>
+	  </div>
+	</div>
+
+</div><!-- fin des paramètres -->
+
 <div id="phaserGame"></div>
+
 <div class="ui modal">
   <i class="close icon"></i>
   <div class="header">Analytics</div>
@@ -41,21 +98,79 @@
   </div>
 </div>
 
+
 <div id="analytics">
 <!--table>
 	<tr><th>timestamp</th><tr>
 </table-->
 </div>
+<script src="config.js"></script>
+<script language="javascript">
+	parameters = {
+		nombres: {
+			vitesse : {
+				start: 10,
+				min: 1,
+				max: 20,
+				onChange: function(value) {
+					parameters.nombres.vitesse.start = value;
+					localStorage.setItem('nombres.vitesse', value);
+				}
+			},
+			duree : {
+				start: 30,
+				min: 10,
+				max: 50,
+				step: 5,
+				onChange: function(value) {
+					parameters.nombres.duree.start = value;
+					localStorage.setItem('nombres.duree', value);
+				}
+			}
+		}
+	};
+	
+	if (localStorage.getItem('nombres.vitesse')!=undefined) {
+		parameters.nombres.vitesse.start = parseInt(localStorage.getItem('nombres.vitesse'));
+	}
 
+	if (localStorage.getItem('nombres.duree')!=undefined) {
+		parameters.nombres.duree.start = parseInt(localStorage.getItem('nombres.duree'));
+	}
+
+	$(document).ready(function() {
+
+		$('#login').text(params.user.login);
+		$('#photo').attr('src', params.user.photo);
+	
+		$('.ui.accordion')
+			.accordion()
+		;
+	
+		$('.range[data-param="vitesse"]').range(parameters.nombres.vitesse);
+	
+		$('.range[data-param="duree"]').range(parameters.nombres.duree);		
+	
+		//$('#phaserGame').hide();
+		
+		$('#startGame').click(function() {
+			$('#phaserGame').show();
+			game.state.start('nombres');
+
+		});
+	
+	});
+
+</script>
+<script src="menu.js"></script>
+<script src="nombres.js"></script>
+<script src="succes.js"></script>
 <script language="javascript">
 
 var game = new Phaser.Game(800, 600, Phaser.AUTO, 'phaserGame');
 
-game.state.add('menu', menu);
 game.state.add('nombres', nombres);
 game.state.add('succes', succes);
-
-game.state.start('menu');
 
 </script>
 <script>
