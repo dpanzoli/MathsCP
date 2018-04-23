@@ -5,6 +5,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/1.11.8/semantic.min.js"></script>
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script src="config.js"></script>
 <script src="phaser.min.js"></script>
 <script src="menu.js"></script>
 <script src="nombres.js"></script>
@@ -65,41 +66,24 @@ game.state.start('menu');
 
 </script>
 <script>
-var version = 3;
 
-var request = indexedDB.open('tracesDB', version);
-var db;
+	var points = {
+		x:[],
+		y:[],
+		mode: 'markers'
+	}
 
-request.onupgradeneeded = function(e) {
-  console.log("La version a changé. (Re)Création de la base");
-  db = e.target.result;
-  try {
-	db.deleteObjectStore('traces');
-  } catch (error) {}
-  store = db.createObjectStore('traces', {keyPath: 'timestamp'});
-};
-
-request.onsuccess = function(e) {
-  console.log("Ouverture de la base");
-  db = e.target.result;
-  var transaction = db.transaction('traces', "readwrite");
-  var store = transaction.objectStore('traces');
-  
-  var points = {
-			x:[],
-			y:[],
-			mode: 'markers'
-		}
-	
-	store.openCursor().onsuccess = function(event) {
-
-		var cursor = event.target.result;
-		//var timestamp = new Date(cursor.key);
-		if (cursor) {
-			points.x.push(cursor.value.nombre);
-			points.y.push(cursor.value.time);
-			cursor.continue();
-		} else {
+	$.ajax({
+		method: 'GET',
+		url: 'http://davidpanzo.hd.free.fr:8080/all',
+		datatype: 'json',
+		success: function(json) {
+		
+			//remplissage des points à partir du retour json
+			json.forEach(function (p) {
+				points.x.push(p.nombre);
+				points.y.push(p.temps);
+			});
 		
 			var data = [ points ];
 
@@ -117,10 +101,11 @@ request.onsuccess = function(e) {
 			};
 			
 			Plotly.newPlot('graphe1', data, layout);
+		},
+		error: function(xh, sts, err) {
+			console.log(sts+":"+err);
 		}
-	};
-
-};
+	});
 
 </script>
 </body>
