@@ -69,30 +69,7 @@ var  nombres = {
 		g.endFill();
 		
 		this.score = 0;
-		this.timeLeft = 0,
-		this.validate();
-		
-		//reconnaissance vocale
-		var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition
-
-		recognition = new SpeechRecognition();
-		recognition.context = this;
-		recognition.continuous = true;
-		recognition.lang = "fr-FR";
-		recognition.onresult = function (event) {
-			for (i = event.resultIndex; i < event.results.length; i++) {
-				nombre = event.results[i][0].transcript;
-				console.log(event.results[i][0].confidence);
-				this.context.validate(nombre);
-			}
-			recognition.context.counting = true;
-		}
-		recognition.onsoundstart = function(event) {
-			//TODO: bug. Ne fonctionne qu'unne fois
-			console.log("tu as dit quoi ?");
-			recognition.context.counting = false;
-		}
-		recognition.start()
+		this.timeLeft = 0;
     },
  
     update: function() {
@@ -114,27 +91,37 @@ var  nombres = {
 		}
     },
 	
-	validate: function(n) {
-		if (n==this.nombre) {
-			correctSound.play();
-			this.score += this.timeLeft;
-			if (this.score !=0) this.updateProgress();
-			if (this.score<this.objective) {
-				this.reset();
-			}
+	validate: function() {
+		correctSound.play();
+		this.score += this.timeLeft;
+		if (this.score !=0) this.updateProgress();
+		if (this.score<this.objective) {
+			this.reset();
 		}
 	},
 	
 	reset: function() {
 		//Log du résultat précédent
-		var requestAdd = db.transaction(["traces"], "readwrite")
-			.objectStore("traces")
-			.add({
-				timestamp: new Date(),
-				nombre:this.dizaine.num.text+this.unité.num.text,
-				time: this.maxTime-this.timeLeft
+		//http://davidpanzo.hd.free.fr:8080/add?login=David&nombre=9&temps=99
+		var nbr = parseInt(this.dizaine.num.text)*10+parseInt(this.unité.num.text);
+		if (!isNaN(nbr)) {
+			$.ajax({
+				method: 'GET',
+				url: 'http://davidpanzo.hd.free.fr:8080/add',
+				datatype: 'json',
+				data: {
+					login: game_user_login,
+					nombre:nbr,
+					temps: this.maxTime-this.timeLeft
+				},
+				success: function(data) {
+					console.log(data);
+				},
+				error: function(xh, sts, err) {
+					console.log(sts+":"+err);
+				}
 			});
-
+		}
 		this.nombre = game.rnd.integerInRange(10, 99);
 		this.dizaine.num.setText(parseInt(this.nombre/10));
 		this.unité.num.setText(this.nombre%10);
