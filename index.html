@@ -42,35 +42,51 @@
 	
 	
 	<div class="ui styled accordion">
-	  <div class="active title">
+	  <div class="title">
 		<i class="dropdown icon"></i>
 		Reconnaître les nombres
 	  </div>
-	  <div class="active content">
-		<div class="ui segment">
-			<span>Vitesse</span>
-			<div class="ui range" data-game='nombres' data-param="vitesse"></div>
+	  <div class="content" data-game="nombres">
+		<div class="ui segment" data-param="vitesse">
+			Temps pour deviner (<span class='sec'></span> s)
+			<div class="ui range" ></div>
 		</div>
 
-		<div class="ui segment">
-			<span>Durée</span>
-			<div class="ui range" data-game='nombres' data-param='duree'></div>
+		<div class="ui segment" data-param='duree'>
+			Durée progression (~<span class='sec'></span> s)
+			<div class="ui range" ></div>
 		</div>
 
-		<button id="startGame" class="ui button">
+		<button class="startGame ui button">
 			Démarrer
 		</button>
 
-		<button id="showAnalytics" class="ui button">
+		<button class="showAnalytics ui button">
 			Stats
 		</button>
 	  </div>
-	  <div class="title">
+	  <div class=" title">
 		<i class="dropdown icon"></i>
 		Additionner deux chiffres
 	  </div>
-	  <div class="content">
-		<p>À venir ...</p>
+	  <div class=" content" data-game="additions">
+		<div class="ui segment" data-param="vitesse">
+			Temps pour deviner (<span class='sec'></span> s)
+			<div class="ui range"></div>
+		</div>
+
+		<div class="ui segment" data-param='duree'>
+			Durée progression (~<span class='sec'></span> s)
+			<div class="ui range"></div>
+		</div>
+
+		<button class="startGame ui button">
+			Démarrer
+		</button>
+
+		<button class="showAnalytics ui button">
+			Stats
+		</button>
 	  </div>
 	  <div class="title">
 		<i class="dropdown icon"></i>
@@ -106,57 +122,83 @@
 </div>
 <script src="config.js"></script>
 <script language="javascript">
+
 	parameters = {
 		nombres: {
 			vitesse : {
+				id_saved: 'nombres.vitesse',
 				start: 10,
 				min: 1,
 				max: 20,
-				onChange: function(value) {
-					parameters.nombres.vitesse.start = value;
-					localStorage.setItem('nombres.vitesse', value);
-				}
 			},
 			duree : {
-				start: 30,
-				min: 10,
-				max: 50,
-				step: 5,
-				onChange: function(value) {
-					parameters.nombres.duree.start = value;
-					localStorage.setItem('nombres.duree', value);
-				}
+				id_saved: 'nombres.duree',
+				start: 50,
+				min: 30,
+				max: 180,
+				step: 10,
+			}
+		},
+		additions: {
+			vitesse : {
+				id_saved: 'additions.vitesse',
+				start: 10,
+				min: 1,
+				max: 20,
+			},
+			duree : {
+				id_saved: 'additions.duree',
+				start: 50,
+				min: 30,
+				max: 180,
+				step: 10,
 			}
 		}
 	};
 	
-	if (localStorage.getItem('nombres.vitesse')!=undefined) {
-		parameters.nombres.vitesse.start = parseInt(localStorage.getItem('nombres.vitesse'));
-	}
-
-	if (localStorage.getItem('nombres.duree')!=undefined) {
-		parameters.nombres.duree.start = parseInt(localStorage.getItem('nombres.duree'));
-	}
-
+	//Restauration au chargement
+	Object.keys(parameters).forEach(function(jeu_id) {
+		Object.keys(parameters[jeu_id]).forEach(function(param_id) {
+			var param_saved = parameters[jeu_id][param_id].id_saved;
+			if (localStorage.getItem(param_saved)!=undefined) {
+				parameters[jeu_id][param_id].start = parseInt(localStorage.getItem(param_saved));
+			}
+			//Gestion des événements pour la sauvegarde
+			parameters[jeu_id][param_id].onChange=function(value) {
+				$('div[data-game='+jeu_id+'] div[data-param='+param_id+'] span.sec').text(value);
+				parameters[jeu_id][param_id].start = value;
+				localStorage.setItem(this.id_saved, value);
+			}
+		});
+	});
+	
 	$(document).ready(function() {
 
+		//TODO remove
+		$('#phaserGame').show();
+		game.state.start('additions');
+		//TODO uncomment
+		//$('#phaserGame').hide();
+	
 		$('#login').text(params.user.login);
 		$('#photo').attr('src', params.user.photo);
 	
-		$('.ui.accordion')
-			.accordion()
-		;
-	
-		$('.range[data-param="vitesse"]').range(parameters.nombres.vitesse);
-	
-		$('.range[data-param="duree"]').range(parameters.nombres.duree);		
-	
-		//$('#phaserGame').hide();
+		$('.ui.accordion').accordion({
+			onOpen: function() {
+				var jeu = $(this).attr('data-game');
+				$(this).find('.segment').each(function() {
+					var param= $(this).attr('data-param');
+					//Attention, La structure est clonée, pas référencée
+					$(this).find('.range').range(parameters[jeu][param]);
+				});
+			}
+		});
 		
-		$('#startGame').click(function() {
+		$('.startGame').click(function() {
+			var gameId = $(this).parents(".content").attr('data-game');
+			console.log(gameId)
 			$('#phaserGame').show();
-			game.state.start('nombres');
-
+			game.state.start(gameId);
 		});
 	
 	});
@@ -164,18 +206,20 @@
 </script>
 <script src="menu.js"></script>
 <script src="nombres.js"></script>
+<script src="additions.js"></script>
 <script src="succes.js"></script>
 <script language="javascript">
 
 var game = new Phaser.Game(800, 600, Phaser.AUTO, 'phaserGame');
 
 game.state.add('nombres', nombres);
+game.state.add('additions', additions);
 game.state.add('succes', succes);
 
 </script>
 <script>
 
-	$(showAnalytics).click(function() {
+	$('.showAnalytics').click(function() {
 		$('.ui.modal').modal('show');
 	});
 
