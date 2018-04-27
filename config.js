@@ -2,6 +2,6 @@ var params = {
 	user: {
 /*		login: 'Joshua',
 		photo: 'joshua150.png'
-*/		login: 'David'
+*/		login: 'David1142'
 	}
 }

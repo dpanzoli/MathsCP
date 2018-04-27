@@ -1,10 +1,11 @@
 var  additions2 = {
 	
-	dizaine: {pos: {x:150, y:150}},
-	unité: {pos: {x:150+160, y:150}},
+	dizaines: {chiffreA:0, chiffreB:0, resultat:0, retenue:0},
+	unités: {chiffreA:0, chiffreB:0, resultat:0},
 
 	maxTime: 10, //secondes
 	objective: 10, //secondes épargnées cumulées
+	sommeMax: 50, //Somme maximum des nombres A et B (= difficulté)
 
 	graphicsTimer: null,
 	timer: null,
@@ -14,29 +15,36 @@ var  additions2 = {
 	timeLeft: 0,
 	
     preload: function() {
-		game.load.spritesheet('chiffres_bg', 'chiffres_bg.png', 160,227,2); 
 
 		game.load.image('head', 'photo_Joshua.png');
 		game.load.spritesheet('body', 'walk_anim.png', 50, 86, 9);
-	   
-		game.load.audio('correct', 'correct.mp3');
 
-		this.maxTime = parameters.additions.vitesse.start;
-		this.objective = parameters.additions.duree.start;
+		game.load.audio('correct', 'correct.mp3');
+		game.load.audio('error', 'error.mp3');
+
+		game.load.spritesheet('fleches', 'flèches.png', 53, 26, 6);
+
+		game.load.spritesheet('valider', 'valider.png', 125,125, 2);
+		
+		this.maxTime = parameters.additions2.vitesse.start;
+		this.objective = parameters.additions2.duree.start;
+		this.sommeMax = parameters.additions2.difficulte.start;
     },
  
 	joshua: null,
 	body: null,
 	walk: null,
  
-	nombre: 0,
 	correctSound: null,
+	errorSound: null,
 	counting: true,
  
     create: function() {
+	
 		game.stage.backgroundColor = "#dedede";
 
-		correctSound = game.add.audio('correct');
+		this.correctSound = game.add.audio('correct');
+		//errorSound = game.add.audio('error');
 		
 		this.body = game.add.sprite(+30, -80, 'body',1);
 		var head = game.add.sprite(11, -13, 'head',1);
@@ -45,23 +53,91 @@ var  additions2 = {
 		this.joshua.addChild(this.body);
 		this.walk = this.body.animations.add('walk');
 		//body.animations.play('walk', 10, true);
-
 		
-		var style = { font: "192px Arial", fill: "#000000", align: "center" };
+		var style = { font: "96px Arial", fill: "#000000", align: "center" };
+		var styleR = { font: "48px Arial", fill: "#000000", align: "center" };
 
-		this.dizaine.bg = game.add.sprite(this.dizaine.pos.x,this.dizaine.pos.y,'chiffres_bg', 0);
-		this.dizaine.bg.anchor.setTo(.5,.5);
-		this.dizaine.num = game.add.text(this.dizaine.pos.x, this.dizaine.pos.y, "-", style);
-		this.dizaine.num.anchor.setTo(.5,.5);
+		this.dizaines.textA = game.add.text(150, 50, this.dizaines.chiffreA, style);
+		this.dizaines.textA.anchor.setTo(0.5,0);
+		this.dizaines.textB = game.add.text(150, 160, this.dizaines.chiffreB, style);
+		this.dizaines.textB.anchor.setTo(0.5,0);
+		this.dizaines.textRes = game.add.text(150, 310, this.dizaines.resultat, style);
+		this.dizaines.textRes.anchor.setTo(0.5,0);
+		this.dizaines.textRetenue = game.add.text(150, 70, this.dizaines.retenue, styleR);
+		this.dizaines.textRetenue.anchor.setTo(0.5,1);
+		this.dizaines.plus = game.add.button(150,290, 'fleches', function() {
+			if (this.dizaines.resultat < 19) {
+				this.dizaines.resultat += 1;
+				this.dizaines.textRes.setText(this.dizaines.resultat);
+			}
+		}, this, 1,0,2,1);
+		this.dizaines.plus.anchor.setTo(0.5,0);
+		this.dizaines.moins = game.add.button(150,410, 'fleches', function() {
+			if (this.dizaines.resultat > 0) {
+				this.dizaines.resultat -= 1;
+				this.dizaines.textRes.setText(this.dizaines.resultat);
+			}
+		}, this, 4,3,5,4);
+		this.dizaines.moins.anchor.setTo(0.5,0);
+		
+		
+		this.unités.textA = game.add.text(230, 50, this.unités.chiffreA, style);
+		this.unités.textA.anchor.setTo(0.5,0);
+		this.unités.textB = game.add.text(230, 160, this.unités.chiffreB, style);
+		this.unités.textB.anchor.setTo(0.5,0);
+		this.unités.textRes = game.add.text(230, 310, this.unités.resultat, style);
+		this.unités.textRes.anchor.setTo(0.5,0);
+		this.unités.plus = game.add.button(230,290, 'fleches', function() {
+			if (this.unités.resultat == 9 && this.dizaines.retenue == 1) {
+			 //rien
+			} else {
+				this.unités.resultat += 1;
+				if (this.unités.resultat==10) {
+					this.unités.resultat = 0;
+					this.dizaines.retenue += 1;
+					if (this.dizaines.retenue != 0) {
+						this.dizaines.textRetenue.setText(this.dizaines.retenue);
+					} else {
+						this.dizaines.textRetenue.setText("");
+					}
+				}
+				this.unités.textRes.setText(this.unités.resultat);
+			}
+		}, this, 1,0,2,1);
+		this.unités.plus.anchor.setTo(0.5,0);
+		this.unités.moins = game.add.button(230,410, 'fleches', function() {
+			if (this.unités.resultat ==0 && this.dizaines.retenue==0) {
+				//rien
+			} else {
+				this.unités.resultat -= 1;
+				if (this.unités.resultat==-1) {
+					this.unités.resultat = 9;
+					if (this.dizaines.retenue > 0) this.dizaines.retenue -= 1;
+					if (this.dizaines.retenue != 0) {
+						this.dizaines.textRetenue.setText(this.dizaines.retenue);
+					} else {
+						this.dizaines.textRetenue.setText("");
+					}
+				}
+				this.unités.textRes.setText(this.unités.resultat);
+			}
+		}, this, 4,3,5,4);
+		this.unités.moins.anchor.setTo(0.5,0);
 
-		this.unité.bg = game.add.sprite(this.unité.pos.x,this.unité.pos.y,'chiffres_bg', 1);
-		this.unité.bg.anchor.setTo(.5,.5);
-		this.unité.num = game.add.text(this.unité.pos.x, this.unité.pos.y, "-", style);
-		this.unité.num.anchor.setTo(.5,.5);
+		var valider = game.add.button(300,300, 'valider', this.validate, this, 0, 0, 1, 0);
+	
+		
+		var barre = game.add.graphics(150, 170);
+		barre.beginFill(0x000000,1);
+		barre.drawRect(-100,100,200,10,10);
+		barre.endFill();
+		
+		var plus = game.add.text(100, 220, "+", style);
+		plus.anchor.setTo(1,.5);
 
-		validation = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+/*		validation = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 		validation.onDown.add(this.validate, this);
-
+*/
 		style = { font: "48px Arial", fill: "#ff0080", align: "center" };
 		this.timer = game.add.text(600, 150, "-", style);
 		this.timer.anchor.setTo(.5,.5);
@@ -80,6 +156,10 @@ var  additions2 = {
 			this.timeLeft = this.timeLeft - (game.time.elapsed / 1000) ;
 			this.timer.setText(parseInt(this.timeLeft)+1);
 			if (this.timeLeft <= 0) {
+				//premier passage -> pas de son !
+				if (this.errorSound != undefined)
+					this.errorSound.play();
+				this.errorSound = game.add.audio('error');
 				this.reset();
 			} else {
 				if (this.graphicsTimer) this.graphicsTimer.destroy();
@@ -94,10 +174,23 @@ var  additions2 = {
 		}
     },
 	
+	
 	validate: function() {
-		correctSound.play();
-		this.score += this.timeLeft;
-		if (this.score !=0) this.updateProgress();
+	
+		var addition = 
+				this.dizaines.chiffreA*10+this.unités.chiffreA 
+			+	this.dizaines.chiffreB*10+this.unités.chiffreB 	
+		
+		var proposition = 
+				this.dizaines.resultat*10+this.unités.resultat;
+				
+		if (addition == proposition) {
+			this.correctSound.play();
+			this.score += this.timeLeft;
+			if (this.score !=0) this.updateProgress();
+		} else {
+			this.errorSound.play();
+		}
 		if (this.score<this.objective) {
 			this.reset();
 		}
@@ -105,8 +198,7 @@ var  additions2 = {
 	
 	reset: function() {
 		//Log du résultat précédent
-		//http://davidpanzo.hd.free.fr:8080/add?login=David&nombre=9&temps=99
-		var nbr = parseInt(this.dizaine.num.text)*10+parseInt(this.unité.num.text);
+/*		var nbr = parseInt(this.dizaine.num.text)*10+parseInt(this.unité.num.text);
 		if (!isNaN(nbr)) {
 			$.ajax({
 				method: 'GET',
@@ -125,9 +217,29 @@ var  additions2 = {
 				}
 			});
 		}
-		this.nombre = game.rnd.integerInRange(10, 99);
-		this.dizaine.num.setText(parseInt(this.nombre/10));
-		this.unité.num.setText(this.nombre%10);
+*/
+		console.log(this.sommeMax);
+		do {
+			this.dizaines.chiffreA = game.rnd.integerInRange(1, 9);
+			this.dizaines.chiffreB = game.rnd.integerInRange(1, 9);
+			this.unités.chiffreA = game.rnd.integerInRange(0, 9);
+			this.unités.chiffreB = game.rnd.integerInRange(1, 9);
+			var addition = 
+				this.dizaines.chiffreA*10+this.unités.chiffreA 
+			+	this.dizaines.chiffreB*10+this.unités.chiffreB 
+		
+		} while (addition > this.sommeMax);
+		this.dizaines.textA.setText(this.dizaines.chiffreA);
+		this.dizaines.textB.setText(this.dizaines.chiffreB);
+		this.unités.textA.setText(this.unités.chiffreA);
+		this.unités.textB.setText(this.unités.chiffreB);
+		this.unités.resultat = 0;
+		this.unités.textRes.setText(this.unités.resultat);
+		this.dizaines.resultat = 0;
+		this.dizaines.textRes.setText(this.dizaines.resultat);
+		this.dizaines.retenue = 0;
+		this.dizaines.textRetenue.setText("");
+		
 		this.timeLeft = this.maxTime;
 	},
 

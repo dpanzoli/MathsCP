@@ -60,7 +60,6 @@
 		<button class="startGame ui button">
 			Démarrer
 		</button>
-
 		<button class="showAnalytics ui button">
 			Stats
 		</button>
@@ -70,20 +69,21 @@
 		Additionner deux chiffres
 	  </div>
 	  <div class=" content" data-game="additions">
+		<div class="ui segment" data-param="difficulte">
+			Difficulté (<span class='sec'></span>)
+			<div class="ui range"></div>
+		</div>
 		<div class="ui segment" data-param="vitesse">
 			Temps pour deviner (<span class='sec'></span> s)
 			<div class="ui range"></div>
 		</div>
-
 		<div class="ui segment" data-param='duree'>
 			Durée progression (~<span class='sec'></span> s)
 			<div class="ui range"></div>
 		</div>
-
 		<button class="startGame ui button">
 			Démarrer
 		</button>
-
 		<button class="showAnalytics ui button">
 			Stats
 		</button>
@@ -92,8 +92,25 @@
 		<i class="dropdown icon"></i>
 		Les additions posées
 	  </div>
-	  <div class="content">
-		<p>À venir ...</p>
+	  <div class="content" data-game="additions2">
+		<div class="ui segment" data-param="difficulte">
+			Difficulté (<span class='sec'></span>)
+			<div class="ui range"></div>
+		</div>
+		<div class="ui segment" data-param="vitesse">
+			Temps pour deviner (<span class='sec'></span> s)
+			<div class="ui range"></div>
+		</div>
+		<div class="ui segment" data-param='duree'>
+			Durée progression (~<span class='sec'></span> s)
+			<div class="ui range"></div>
+		</div>
+		<button class="startGame ui button">
+			Démarrer
+		</button>
+		<button class="showAnalytics ui button">
+			Stats
+		</button>
 	  </div>
 	</div>
 
@@ -140,6 +157,12 @@
 			}
 		},
 		additions: {
+			difficulte : {
+				id_saved: 'additions.difficulte',
+				start: 5,
+				min: 3,
+				max: 9
+			},
 			vitesse : {
 				id_saved: 'additions.vitesse',
 				start: 10,
@@ -148,6 +171,28 @@
 			},
 			duree : {
 				id_saved: 'additions.duree',
+				start: 50,
+				min: 30,
+				max: 180,
+				step: 10,
+			}
+		},
+		additions2: {
+			difficulte : {
+				id_saved: 'additions2.difficulte',
+				start: 99,
+				min: 30,
+				max: 198,
+				step: 10
+			},
+			vitesse : {
+				id_saved: 'additions2.vitesse',
+				start: 30,
+				min: 5,
+				max: 60,
+			},
+			duree : {
+				id_saved: 'additions2.duree',
 				start: 50,
 				min: 30,
 				max: 180,
@@ -174,11 +219,7 @@
 	
 	$(document).ready(function() {
 
-		//TODO remove
-		$('#phaserGame').show();
-		game.state.start('additions');
-		//TODO uncomment
-		//$('#phaserGame').hide();
+		$('#phaserGame').hide();
 	
 		$('#login').text(params.user.login);
 		$('#photo').attr('src', params.user.photo);
@@ -196,9 +237,14 @@
 		
 		$('.startGame').click(function() {
 			var gameId = $(this).parents(".content").attr('data-game');
-			console.log(gameId)
 			$('#phaserGame').show();
 			game.state.start(gameId);
+		});
+		
+		$('.showAnalytics').click(function() {
+			var gameId = $(this).parents(".content").attr('data-game');
+			analyse[gameId]();
+			$('.ui.modal').modal('show');
 		});
 	
 	});
@@ -207,6 +253,7 @@
 <script src="menu.js"></script>
 <script src="nombres.js"></script>
 <script src="additions.js"></script>
+<script src="additions2.js"></script>
 <script src="succes.js"></script>
 <script language="javascript">
 
@@ -214,57 +261,122 @@ var game = new Phaser.Game(800, 600, Phaser.AUTO, 'phaserGame');
 
 game.state.add('nombres', nombres);
 game.state.add('additions', additions);
+game.state.add('additions2', additions2);
 game.state.add('succes', succes);
 
 </script>
 <script>
 
-	$('.showAnalytics').click(function() {
-		$('.ui.modal').modal('show');
-	});
+var analyse = {
 
-</script>
-<script>
+	nombres:function() {
 
-	var points = {
-		x:[],
-		y:[],
-		mode: 'markers'
-	}
-
-	$.ajax({
-		method: 'GET',
-		url: 'http://davidpanzo.hd.free.fr:8080/all',
-		datatype: 'json',
-		success: function(json) {
-		
-			//remplissage des points à partir du retour json
-			json.forEach(function (p) {
-				points.x.push(p.nombre);
-				points.y.push(p.temps);
-			});
-		
-			var data = [ points ];
-
-			var layout = {
-			  xaxis: {
-				range: [ 0, 100 ],
-				title: 'nombre à trouver [10,99]'
-				
-			  },
-			  yaxis: {
-				range: [0, 10],
-				title: 'nombre trouvé en ... secondes'
-			  },
-			  title:'Temps passé par nombre'
-			};
-			
-			Plotly.newPlot('graphe1', data, layout);
-		},
-		error: function(xh, sts, err) {
-			console.log(sts+":"+err);
+		var points = {
+			x:[],
+			y:[],
+			mode: 'markers'
 		}
-	});
+
+		$.ajax({
+			method: 'GET',
+			url: 'http://davidpanzo.hd.free.fr:8080/all',
+			datatype: 'json',
+			success: function(json) {
+			
+				//remplissage des points à partir du retour json
+				json.forEach(function (p) {
+					points.x.push(p.nombre);
+					points.y.push(p.temps);
+				});
+			
+				var data = [ points ];
+
+				var layout = {
+				  xaxis: {
+					range: [ 0, 100 ],
+					title: 'nombre à trouver [10,99]'
+					
+				  },
+				  yaxis: {
+					range: [0, 10],
+					title: 'nombre trouvé en ... secondes'
+				  },
+				  title:'Temps passé par nombre'
+				};
+				
+				Plotly.newPlot('graphe1', data, layout);
+			},
+			error: function(xh, sts, err) {
+				console.log(sts+":"+err);
+			}
+		});
+	},
+	additions: function() {
+		
+		var points = {
+			x:[],
+			y:[],
+			mode: 'markers'
+		}
+
+		$.ajax({
+			method: 'GET',
+			url: 'http://davidpanzo.hd.free.fr:8080/all',
+			datatype: 'json',
+			success: function(json) {
+			
+				var _x = [];
+				var _y = [];
+				var _z = [];
+				for (i=0; i<10; i++) {
+					for (j=0; j<10; j++) {
+						_x.push(i);
+						_y.push(j);
+						_z.push(-1);
+					}
+				}
+
+				var _z = [];
+				var login = $('#login').text();
+				//remplissage des points à partir du retour json
+				json.forEach(function (p) {
+					if (p.login == login && p.chiffreA) {
+						_z[parseInt(p.chiffreA)*10+parseInt(p.chiffreB)] = p.temps*10;
+					}
+				});
+				
+				console.log(_z);
+			
+				var trace1 = {
+				  x: _x, //chiffreA
+				  y: _y, //chiffreB
+				  mode: 'markers',
+				  marker: { 
+					size: _z, //temps passé
+					color: _z 
+				  }
+				};
+
+				var data = [ trace1 ];
+
+				var layout = { 
+				  xaxis: {
+					range: [ 0, 10 ] 
+				  },
+				  yaxis: {
+					range: [ 0, 10 ]
+				  },
+				  title:'Temps passé par addition'
+				};
+
+				Plotly.newPlot('graphe1', data, layout);
+			},
+			error: function(xh, sts, err) {
+				console.log(sts+":"+err);
+			}
+		});
+	}
+};
 
 </script>
 </body>

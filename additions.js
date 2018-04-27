@@ -5,6 +5,7 @@ var  additions = {
 
 	maxTime: 10, //secondes
 	objective: 10, //secondes épargnées cumulées
+	maxAlea: 10,
 
 	graphicsTimer: null,
 	timer: null,
@@ -23,6 +24,7 @@ var  additions = {
 
 		this.maxTime = parameters.additions.vitesse.start;
 		this.objective = parameters.additions.duree.start;
+		this.maxAlea = parameters.additions.difficulte.start;
     },
  
 	joshua: null,
@@ -123,8 +125,8 @@ var  additions = {
 			datatype: 'json',
 			data: {
 				login: $('#login').text(),
-				chiffreA: this.chiffreA,
-				chiffreB: this.chiffreB,
+				chiffreA: this.chiffreA.val,
+				chiffreB: this.chiffreB.val,
 				temps: this.maxTime-this.timeLeft
 			},
 			success: function(data) {
@@ -134,10 +136,16 @@ var  additions = {
 				console.log(sts+":"+err);
 			}
 		});
-		this.chiffreA.val = game.rnd.integerInRange(1, 9);
+		this.chiffreA.oldVal = this.chiffreA.val;
+		do {
+			this.chiffreA.val = game.rnd.integerInRange(1, this.maxAlea);
+		} while (this.chiffreA.val == this.chiffreA.oldVal);
 		this.chiffreA.num.setText(this.chiffreA.val);
 		this.chiffreA.dé.frame = this.chiffreA.val;
-		this.chiffreB.val = game.rnd.integerInRange(1, 9);
+		this.chiffreB.oldVal = this.chiffreB.val;
+		do {
+			this.chiffreB.val = game.rnd.integerInRange(1, this.maxAlea);
+		} while (this.chiffreB.val == this.chiffreB.oldVal);
 		this.chiffreB.num.setText(this.chiffreB.val);
 		this.chiffreB.dé.frame = this.chiffreB.val;
 		this.timeLeft = this.maxTime;
